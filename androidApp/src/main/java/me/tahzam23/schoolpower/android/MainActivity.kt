@@ -9,43 +9,31 @@ import android.widget.TextView
 import io.ktor.client.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import me.tahzam23.schoolpower.android.listener.LoginButtonListener
+import me.tahzam23.schoolpower.android.listener.SettingsButtonListener
 import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.login
 
 class MainActivity : AppCompatActivity() {
+    lateinit var username : EditText
+        private set
+    lateinit var password : EditText
+        private set
+    lateinit var successText : TextView
+        private set
+    lateinit var settingsButton : Button
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val username = findViewById<EditText>(R.id.schoolpower_username)
-        val password = findViewById<EditText>(R.id.schoolpower_password)
-        val successText = findViewById<TextView>(R.id.schoolpower_success)
-        findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener {
-            val client = HttpClient {
-                createDefaultClientConfig(this)
-            }
-
-            GlobalScope.launch {
-                val success = login(
-                    client = client,
-                    loginInformation = LoginInformation(
-                        username.text.toString(),
-                        password.text.toString()
-                    )
-                )
-
-                runOnUiThread {
-                    if (success) {
-                        successText.text = "Success"
-                        successText.setTextColor(Color.GREEN)
-                    }
-                    else {
-                        successText.text = "Failure"
-                        successText.setTextColor(Color.RED)
-                    }
-                }
-            }
-        }
+        username = findViewById<EditText>(R.id.schoolpower_username)
+        password = findViewById<EditText>(R.id.schoolpower_password)
+        successText = findViewById<TextView>(R.id.schoolpower_success)
+        settingsButton = findViewById<Button>(R.id.settings)
+        findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener(LoginButtonListener(this))
+        findViewById<Button>(R.id.settings).setOnClickListener(SettingsButtonListener(this))
     }
 }

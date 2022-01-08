@@ -22,6 +22,6 @@ private class ElementImpl(private val element: org.jsoup.nodes.Element): Element
 
     override fun getChildCount() = element.childrenSize()
 
-    override fun getAttribute(attributeName: String) = element.attr(attributeName)
+    override fun getAttribute(attributeName: String): String = element.attr(attributeName)
 
 }

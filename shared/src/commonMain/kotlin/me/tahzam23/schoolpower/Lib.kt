@@ -56,7 +56,7 @@ suspend fun login(
 
     for (rowIndex in 2 until table.getChildCount() - 1) {
         val row = table.getChild(rowIndex)
-        row.getChild(17).getChild(0).getAttribute("href")
+        println(row.getChild(17).getChild(0).getAttribute("href"))
     }
 }
 

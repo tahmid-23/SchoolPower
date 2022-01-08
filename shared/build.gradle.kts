@@ -25,8 +25,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+                api("io.ktor:ktor-client-core:$ktorVersion")
+                api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
             }
         }
         val androidMain by getting {

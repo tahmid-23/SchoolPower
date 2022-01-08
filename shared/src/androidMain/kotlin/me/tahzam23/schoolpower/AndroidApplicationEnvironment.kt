@@ -1,8 +1,8 @@
 package me.tahzam23.schoolpower
 
 import android.content.SharedPreferences
-import me.tahzam23.schoolpower.android.LOGIN_PASSWORD_KEY
-import me.tahzam23.schoolpower.android.LOGIN_USERNAME_KEY
+import me.tahzam23.schoolpower.login.LOGIN_PASSWORD_KEY
+import me.tahzam23.schoolpower.login.LOGIN_USERNAME_KEY
 import me.tahzam23.schoolpower.data.LoginInformation
 
 class AndroidApplicationEnvironment(

@@ -10,6 +10,7 @@ import me.tahzam23.schoolpower.android.MainActivity
 import me.tahzam23.schoolpower.android.R
 import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
+import me.tahzam23.schoolpower.html.AndroidDocumentCreator
 import me.tahzam23.schoolpower.login
 
 class SettingsButtonListener(private val app : AppCompatActivity) : View.OnClickListener {
@@ -31,7 +32,8 @@ class LoginButtonListener(private val app : MainActivity) : View.OnClickListener
                 loginInformation = LoginInformation(
                     app.username.text.toString(),
                     app.password.text.toString()
-                )
+                ),
+                documentCreator = AndroidDocumentCreator()
             )
 
             app.runOnUiThread {

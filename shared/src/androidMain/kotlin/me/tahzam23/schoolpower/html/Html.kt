@@ -2,9 +2,15 @@ package me.tahzam23.schoolpower.html
 
 import org.jsoup.Jsoup
 
-actual fun createDocument(html: String): Element {
-    return ElementImpl(Jsoup.parse(html))
+class AndroidDocumentCreator: DocumentCreator {
+
+    override fun createDocument(html: String): Element {
+        return ElementImpl(Jsoup.parse(html))
+    }
+
 }
+
+
 
 private class ElementImpl(private val element: org.jsoup.nodes.Element): Element {
 
@@ -23,5 +29,7 @@ private class ElementImpl(private val element: org.jsoup.nodes.Element): Element
     override fun getChildCount() = element.childrenSize()
 
     override fun getAttribute(attributeName: String): String = element.attr(attributeName)
+
+    override fun getOwnText(): String = element.ownText()
 
 }

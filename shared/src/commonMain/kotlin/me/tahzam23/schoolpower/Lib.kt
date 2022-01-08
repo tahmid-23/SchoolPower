@@ -3,12 +3,17 @@ package me.tahzam23.schoolpower
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.cookies.*
+import io.ktor.client.features.get
+import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.*
 import me.tahzam23.schoolpower.data.LoginInformation
+import me.tahzam23.schoolpower.data.RequestInformation
 import me.tahzam23.schoolpower.data.SchoolPowerInfo
-import me.tahzam23.schoolpower.html.createDocument
+import me.tahzam23.schoolpower.data.grade.MarkingPeriod
+import me.tahzam23.schoolpower.data.grade.markingPeriods
+import me.tahzam23.schoolpower.html.DocumentCreator
 
 private fun createRequestParameters(loginInformation: LoginInformation) = parametersOf(
     "dbpw" to listOf(loginInformation.password),
@@ -39,15 +44,15 @@ fun createDefaultClientConfig(config: HttpClientConfig<*>) {
 }
 
 suspend fun login(
-    root: String = SCHOOLPOWER_GRADE_ROOT,
-    endpoint: String = SCHOOLPOWER_GRADE_ENDPOINT,
+    requestInformation: RequestInformation = RequestInformation(),
     client: HttpClient,
-    loginInformation: LoginInformation
+    loginInformation: LoginInformation,
+    documentCreator: DocumentCreator
 ): Boolean {
     try {
-        val document = createDocument(
+        val document = documentCreator.createDocument(
             client.submitForm(
-                root + endpoint,
+                requestInformation.root + requestInformation.endpoint,
                 createRequestParameters(loginInformation)
             )
         )
@@ -56,18 +61,39 @@ suspend fun login(
             .getElementById(GRADE_TABLE_ID)
             ?.getChild(1)
             ?.getChild(1) ?: throw IllegalArgumentException()
+
+        for (rowIndex in 2 until table.getChildCount() - 1) {
+            val row = table.getChild(rowIndex)
+
+            val courseInfo = row.getChild(11)
+            val courseName = courseInfo.getOwnText()
+            val teacher = courseInfo
+                .getChild(courseInfo.getChildCount() - 1)
+                .getOwnText().substring("Email ".length)
+
+            for (markingPeriodIndex in markingPeriods.indices) {
+                val cell = row.getChild(12 + markingPeriodIndex)
+                if (cell.getAttribute("class") != "notInSession") {
+                    val link = cell.getChild(0)
+
+                    if (link.getOwnText() != "[ i ]") {
+                        val href = link.getAttribute("href")
+                        val gradeDocument = documentCreator.createDocument(
+                            client.get(requestInformation.root + href)
+                        )
+                    }
+
+                    val markingPeriod = markingPeriods[markingPeriodIndex]
+                }
+            }
+        }
+
         return true
     }
     catch (e: Exception) {
+        e.printStackTrace()
         return false
     }
-
-    /*
-    for (rowIndex in 2 until table.getChildCount() - 1) {
-        val row = table.getChild(rowIndex)
-        println(row.getChild(17).getChild(0).getAttribute("href"))
-    }
-     */
 }
 
 fun isSchoolPowerOpen(schoolPowerInfo: SchoolPowerInfo = SchoolPowerInfo()): Boolean {

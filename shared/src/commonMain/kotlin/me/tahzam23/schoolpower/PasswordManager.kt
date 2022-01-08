@@ -2,7 +2,7 @@ package me.tahzam23.schoolpower
 
 import me.tahzam23.schoolpower.data.LoginInformation
 
-interface ApplicationEnvironment {
+interface PasswordManager {
 
     fun getLoginDetails(): LoginInformation?
 

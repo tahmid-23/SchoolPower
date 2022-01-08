@@ -5,9 +5,9 @@ import me.tahzam23.schoolpower.login.LOGIN_PASSWORD_KEY
 import me.tahzam23.schoolpower.login.LOGIN_USERNAME_KEY
 import me.tahzam23.schoolpower.data.LoginInformation
 
-class AndroidApplicationEnvironment(
+class AndroidPasswordManager(
     private val preferences: SharedPreferences
-): ApplicationEnvironment {
+): PasswordManager {
 
     override fun getLoginDetails(): LoginInformation? {
         val username = preferences.getString(LOGIN_USERNAME_KEY, null)

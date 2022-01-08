@@ -1,6 +1,10 @@
 package me.tahzam23.schoolpower.html
 
-expect fun createDocument(html: String): Element
+interface DocumentCreator {
+
+    fun createDocument(html: String): Element
+
+}
 
 interface Element {
 
@@ -11,5 +15,7 @@ interface Element {
     fun getChildCount(): Int
 
     fun getAttribute(attributeName: String): String
+
+    fun getOwnText(): String
 
 }

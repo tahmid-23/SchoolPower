@@ -43,21 +43,31 @@ suspend fun login(
     endpoint: String = SCHOOLPOWER_GRADE_ENDPOINT,
     client: HttpClient,
     loginInformation: LoginInformation
-) {
-    val document = createDocument(client.submitForm(
-        root + endpoint,
-        createRequestParameters(loginInformation)
-    ))
+): Boolean {
+    try {
+        val document = createDocument(
+            client.submitForm(
+                root + endpoint,
+                createRequestParameters(loginInformation)
+            )
+        )
 
-    val table = document
-        .getElementById(GRADE_TABLE_ID)
-        ?.getChild(1)
-        ?.getChild(1) ?: throw IllegalArgumentException()
+        val table = document
+            .getElementById(GRADE_TABLE_ID)
+            ?.getChild(1)
+            ?.getChild(1) ?: throw IllegalArgumentException()
+        return true
+    }
+    catch (e: Exception) {
+        return false
+    }
 
+    /*
     for (rowIndex in 2 until table.getChildCount() - 1) {
         val row = table.getChild(rowIndex)
         println(row.getChild(17).getChild(0).getAttribute("href"))
     }
+     */
 }
 
 fun isSchoolPowerOpen(schoolPowerInfo: SchoolPowerInfo = SchoolPowerInfo()): Boolean {

@@ -4,13 +4,13 @@ plugins {
 }
 
 val ktorVersion = "1.6.7" // "2.0.0-beta-1" - waiting on https://github.com/ktorio/ktor/pull/2702 (KTOR-3358)
-val datetimeVersion = "0.3.1"
 
 val androidKtorEngine = "android"
 
 kotlin {
     android()
-    
+
+    /*
     listOf(
         iosX64(),
         iosArm64(),
@@ -20,31 +20,22 @@ kotlin {
             baseName = "shared"
         }
     }
+     */
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$datetimeVersion")
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-$androidKtorEngine:$ktorVersion")
+                implementation("org.jsoup:jsoup:1.14.3")
             }
         }
-        val androidTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13.2")
-            }
-        }
+        /*
         val iosX64Main by getting
         val iosArm64Main by getting
         //val iosSimulatorArm64Main by getting
@@ -58,15 +49,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
-        val iosX64Test by getting
-        val iosArm64Test by getting
-        //val iosSimulatorArm64Test by getting
-        val iosTest by creating {
-            dependsOn(commonTest)
-            iosX64Test.dependsOn(this)
-            iosArm64Test.dependsOn(this)
-            //iosSimulatorArm64Test.dependsOn(this)
-        }
+         */
     }
 }
 
@@ -77,4 +60,14 @@ android {
         minSdk = 21
         targetSdk = 32
     }
+    // JDK8 libs
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5") // JDK8 libs
 }

@@ -4,10 +4,11 @@ import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.datetime.*
 import me.tahzam23.schoolpower.data.LoginInformation
+import me.tahzam23.schoolpower.data.SchoolPowerInfo
+import me.tahzam23.schoolpower.html.createDocument
 
 private fun createRequestParameters(loginInformation: LoginInformation) = parametersOf(
     "dbpw" to listOf(loginInformation.password),
@@ -25,8 +26,6 @@ private fun createRequestParameters(loginInformation: LoginInformation) = parame
     "translatorpw" to listOf(""),
 )
 
-private fun isWeekend(dayOfWeek: DayOfWeek) = dayOfWeek.isoDayNumber == 6 || dayOfWeek.isoDayNumber == 7
-
 fun createDefaultClientConfig(config: HttpClientConfig<*>) {
     config.install(HttpRedirect) {
         checkHttpMethod = false
@@ -39,13 +38,31 @@ fun createDefaultClientConfig(config: HttpClientConfig<*>) {
     config.BrowserUserAgent()
 }
 
-suspend fun login(client: HttpClient, loginInformation: LoginInformation) =
-    client.submitForm<HttpResponse>(SCHOOLPOWER_GRADE_ENDPOINT, createRequestParameters(loginInformation))
+suspend fun login(
+    root: String = SCHOOLPOWER_GRADE_ROOT,
+    endpoint: String = SCHOOLPOWER_GRADE_ENDPOINT,
+    client: HttpClient,
+    loginInformation: LoginInformation
+) {
+    val document = createDocument(client.submitForm(
+        root + endpoint,
+        createRequestParameters(loginInformation)
+    ))
 
-fun isSchoolPowerOpen(): Boolean {
-    val timeZone = TimeZone.of(BCA_TIMEZONE_ID)
-    val dateTime = Clock.System.now().toLocalDateTime(timeZone)
+    val table = document
+        .getElementById(GRADE_TABLE_ID)
+        ?.getChild(1)
+        ?.getChild(1) ?: throw IllegalArgumentException()
 
-    return isWeekend(dateTime.dayOfWeek) || (dateTime.hour < SCHOOLPOWER_CLOSE_BEGIN_HOUR ||
-            dateTime.hour > SCHOOLPOWER_CLOSE_END_HOUR)
+    for (rowIndex in 2 until table.getChildCount() - 1) {
+        val row = table.getChild(rowIndex)
+        row.getChild(17).getChild(0).getAttribute("href")
+    }
+}
+
+fun isSchoolPowerOpen(schoolPowerInfo: SchoolPowerInfo = SchoolPowerInfo()): Boolean {
+    val dateTime = Clock.System.now().toLocalDateTime(schoolPowerInfo.timeZone)
+
+    return dateTime.dayOfWeek in schoolPowerInfo.fullyOpenDays ||
+            (dateTime.hour < schoolPowerInfo.beginHour || dateTime.hour > schoolPowerInfo.endHour)
 }

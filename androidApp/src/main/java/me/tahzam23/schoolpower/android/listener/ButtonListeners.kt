@@ -2,6 +2,7 @@ package me.tahzam23.schoolpower.android.listener
 
 import android.graphics.Color
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import io.ktor.client.*
 import kotlinx.coroutines.GlobalScope
@@ -12,6 +13,8 @@ import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.html.AndroidDocumentCreator
 import me.tahzam23.schoolpower.login
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class SettingsButtonListener(private val app : AppCompatActivity) : View.OnClickListener {
     override fun onClick(p0: View?) {
@@ -40,12 +43,23 @@ class LoginButtonListener(private val app : MainActivity) : View.OnClickListener
                 if (success) {
                     app.successText.text = "Success"
                     app.successText.setTextColor(Color.GREEN)
+                    app.setContentView(R.layout.grades)
                 }
                 else {
-                    app.successText.text = "Failure"
+                    app.successText.text = "Incorrect Username or Password!"
                     app.successText.setTextColor(Color.RED)
                 }
             }
         }
     }
+}
+
+class UpdateGradesButtonListener(private val app : MainActivity) : View.OnClickListener {
+    override fun onClick(p0: View?) {
+        val dtf = DateTimeFormatter.ofPattern("MM/dd at HH:mm:ss")
+        val now = LocalDateTime.now()
+        val text = "Last Updated: " + dtf.format(now)
+        app.findViewById<TextView>(R.id.last_updated).text = text
+    }
+
 }

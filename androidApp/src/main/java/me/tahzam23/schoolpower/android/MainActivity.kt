@@ -11,6 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.tahzam23.schoolpower.android.listener.LoginButtonListener
 import me.tahzam23.schoolpower.android.listener.SettingsButtonListener
+import me.tahzam23.schoolpower.android.listener.UpdateGradesButtonListener
 import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.login
@@ -35,5 +36,7 @@ class MainActivity : AppCompatActivity() {
         settingsButton = findViewById<Button>(R.id.settings)
         findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener(LoginButtonListener(this))
         findViewById<Button>(R.id.settings).setOnClickListener(SettingsButtonListener(this))
+        val inflatedView = layoutInflater.inflate(R.layout.grades, null)
+        inflatedView.findViewById<Button>(R.id.update_button).setOnClickListener(UpdateGradesButtonListener(this))
     }
 }

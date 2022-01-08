@@ -1,10 +1,11 @@
-package me.tahzam23.schoolpower.android
+package me.tahzam23.schoolpower
 
 import android.content.SharedPreferences
-import me.tahzam23.schoolpower.ApplicationEnvironment
+import me.tahzam23.schoolpower.android.LOGIN_PASSWORD_KEY
+import me.tahzam23.schoolpower.android.LOGIN_USERNAME_KEY
 import me.tahzam23.schoolpower.data.LoginInformation
 
-internal class AndroidApplicationEnvironment(
+class AndroidApplicationEnvironment(
     private val preferences: SharedPreferences
 ): ApplicationEnvironment {
 

@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.tahzam23.schoolpower.PasswordManager
 import me.tahzam23.schoolpower.data.RequestInformation
+import me.tahzam23.schoolpower.datetime.DateTimeFormatConverter
 import me.tahzam23.schoolpower.html.DocumentCreator
 import me.tahzam23.schoolpower.login
 
@@ -16,6 +17,7 @@ class SchoolPowerRequestWorker(
     private val requestInformation: RequestInformation,
     private val client: HttpClient,
     private val documentCreator: DocumentCreator,
+    private val dateTimeFormatConverter: DateTimeFormatConverter,
     appContext: Context,
     workerParams: WorkerParameters
 ): CoroutineWorker(appContext, workerParams) {
@@ -25,7 +27,13 @@ class SchoolPowerRequestWorker(
             val loginInformation = passwordManager.getLoginDetails()
                 ?: return@withContext Result.failure()
 
-            val success = login(requestInformation, client, loginInformation, documentCreator)
+            val success = login(
+                requestInformation,
+                client,
+                loginInformation,
+                documentCreator,
+                dateTimeFormatConverter
+            )
             return@withContext if (success) {
                 Result.success()
             }

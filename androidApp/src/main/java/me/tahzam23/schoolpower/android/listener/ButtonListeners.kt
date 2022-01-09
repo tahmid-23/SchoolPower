@@ -11,6 +11,7 @@ import me.tahzam23.schoolpower.android.MainActivity
 import me.tahzam23.schoolpower.android.R
 import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
+import me.tahzam23.schoolpower.datetime.AndroidDateTimeFormatConverter
 import me.tahzam23.schoolpower.html.AndroidDocumentCreator
 import me.tahzam23.schoolpower.login
 import java.time.LocalDateTime
@@ -36,7 +37,8 @@ class LoginButtonListener(private val app : MainActivity) : View.OnClickListener
                     app.username.text.toString(),
                     app.password.text.toString()
                 ),
-                documentCreator = AndroidDocumentCreator()
+                documentCreator = AndroidDocumentCreator(),
+                dateTimeFormatConverter = AndroidDateTimeFormatConverter()
             )
 
             app.runOnUiThread {

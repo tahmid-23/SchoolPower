@@ -3,16 +3,16 @@ package me.tahzam23.schoolpower
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.cookies.*
-import io.ktor.client.features.get
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.*
+import kotlinx.serialization.json.Json
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.data.RequestInformation
 import me.tahzam23.schoolpower.data.SchoolPowerInfo
-import me.tahzam23.schoolpower.data.grade.MarkingPeriod
 import me.tahzam23.schoolpower.data.grade.markingPeriods
+import me.tahzam23.schoolpower.datetime.DateTimeFormatConverter
 import me.tahzam23.schoolpower.html.DocumentCreator
 
 private fun createRequestParameters(loginInformation: LoginInformation) = parametersOf(
@@ -40,6 +40,12 @@ fun createDefaultClientConfig(config: HttpClientConfig<*>) {
         storage = AcceptAllCookiesStorage()
     }
 
+    /* Uncomment for logging
+    config.install(Logging) {
+        level = LogLevel.ALL
+    }
+     */
+
     config.BrowserUserAgent()
 }
 
@@ -47,12 +53,13 @@ suspend fun login(
     requestInformation: RequestInformation = RequestInformation(),
     client: HttpClient,
     loginInformation: LoginInformation,
-    documentCreator: DocumentCreator
+    documentCreator: DocumentCreator,
+    dateTimeFormatConverter: DateTimeFormatConverter
 ): Boolean {
     try {
         val document = documentCreator.createDocument(
             client.submitForm(
-                requestInformation.root + requestInformation.endpoint,
+                requestInformation.root + requestInformation.path + requestInformation.endpoint,
                 createRequestParameters(loginInformation)
             )
         )
@@ -69,18 +76,61 @@ suspend fun login(
             val courseName = courseInfo.getOwnText()
             val teacher = courseInfo
                 .getChild(courseInfo.getChildCount() - 1)
-                .getOwnText().substring("Email ".length)
+                .getOwnText().substring(TEACHER_FIELD_PREFIX_LENGTH)
 
             for (markingPeriodIndex in markingPeriods.indices) {
                 val cell = row.getChild(12 + markingPeriodIndex)
-                if (cell.getAttribute("class") != "notInSession") {
+                if (cell.getAttribute(HTML_ATTRIBUTE_CLASS) != CLASS_UNAVAILABLE) {
                     val link = cell.getChild(0)
 
                     if (link.getOwnText() != "[ i ]") {
-                        val href = link.getAttribute("href")
+                        val href = link.getAttribute(HTML_ATTRIBUTE_HREF)
                         val gradeDocument = documentCreator.createDocument(
-                            client.get(requestInformation.root + href)
+                            client.get(requestInformation.root + requestInformation.path +
+                                    href)
                         )
+
+                        val content = gradeDocument.getElementById("content-main")!!
+                        val div = content.getChild(2)
+                        val info = div.getChild(6)
+                        val sectionId = info.getChild(0).getAttribute("data-sectionid")
+
+                        val summary = info.getAttribute("data-ng-init")
+                        val studentFRN = summary
+                            .substringAfter("studentFRN")
+                            .substringAfter("'")
+                            .substringBefore("'")
+                        val beginningDate = dateTimeFormatConverter.convert(
+                            "MM/dd/yyyy", "yyyy-M-d",
+                            summary
+                                .substringAfter("beginningDate")
+                                .substringAfter("'")
+                                .substringBefore("'"))
+                        val endingDate = dateTimeFormatConverter.convert(
+                            "MM/dd/yyyy", "yyyy-M-d",
+                            summary
+                                .substringAfter("endingDate")
+                                .substringAfter("'")
+                                .substringBefore("'"))
+
+
+                        val studentId = Regex("001([0-9]+)").find(studentFRN)!!
+                            .groupValues[1]
+
+                        val data = "{\"section_ids\":[$sectionId],\"student_ids\":[$studentId]," +
+                                "\"start_date\":\"$beginningDate\",\"end_date\":\"$endingDate\"}"
+                        val time = Clock.System.now().toEpochMilliseconds()
+
+                        val json = client.post<String>(requestInformation.root +
+                                "ws/xte/assignment/lookup") {
+                            contentType(ContentType.Application.Json)
+                            header("Referer", requestInformation.root + requestInformation.path +
+                                    href)
+                            parameter("_", time)
+                            body = data
+                        }
+
+                        Json.parseToJsonElement(json)
                     }
 
                     val markingPeriod = markingPeriods[markingPeriodIndex]

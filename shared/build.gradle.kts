@@ -27,6 +27,11 @@ kotlin {
             dependencies {
                 api("io.ktor:ktor-client-core:$ktorVersion")
                 api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+                /* Uncomment for logging
+                implementation("ch.qos.logback:logback-classic:1.2.10")
+                implementation("io.ktor:ktor-client-logging:$ktorVersion")
+                 */
             }
         }
         val androidMain by getting {

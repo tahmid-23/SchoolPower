@@ -1,29 +1,26 @@
 package me.tahzam23.schoolpower.android
 
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import io.ktor.client.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import me.tahzam23.schoolpower.android.listener.LoginButtonListener
 import me.tahzam23.schoolpower.android.listener.SettingsButtonListener
 import me.tahzam23.schoolpower.android.listener.UpdateGradesButtonListener
-import me.tahzam23.schoolpower.createDefaultClientConfig
-import me.tahzam23.schoolpower.data.LoginInformation
-import me.tahzam23.schoolpower.login
+import me.tahzam23.schoolpower.data.RequestInformation
+import me.tahzam23.schoolpower.datetime.AndroidDateTimeFormatConverter
+import me.tahzam23.schoolpower.html.AndroidDocumentCreator
+import me.tahzam23.schoolpower.scraper.WebSchoolPowerScraper
 
-class MainActivity : AppCompatActivity() {
-    lateinit var username : EditText
+class MainActivity: AppCompatActivity() {
+    lateinit var username: EditText
         private set
-    lateinit var password : EditText
+    lateinit var password: EditText
         private set
-    lateinit var successText : TextView
+    lateinit var successText: TextView
         private set
-    lateinit var settingsButton : Button
+    lateinit var settingsButton: Button
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +31,14 @@ class MainActivity : AppCompatActivity() {
         password = findViewById(R.id.schoolpower_password)
         successText = findViewById(R.id.schoolpower_success)
         settingsButton = findViewById(R.id.settings)
-        findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener(LoginButtonListener(this))
+        findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener(LoginButtonListener(
+            WebSchoolPowerScraper(
+                RequestInformation(),
+                AndroidDocumentCreator(),
+                AndroidDateTimeFormatConverter()
+            ),
+            this
+        ))
         findViewById<Button>(R.id.settings).setOnClickListener(SettingsButtonListener(this))
         val inflatedView = layoutInflater.inflate(R.layout.grades, null)
         inflatedView.findViewById<Button>(R.id.update_button).setOnClickListener(UpdateGradesButtonListener(this))

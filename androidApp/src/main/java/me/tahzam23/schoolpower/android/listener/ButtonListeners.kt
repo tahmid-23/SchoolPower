@@ -1,9 +1,9 @@
 package me.tahzam23.schoolpower.android.listener
 
+import android.app.Activity
 import android.graphics.Color
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import io.ktor.client.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -13,33 +13,39 @@ import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.datetime.AndroidDateTimeFormatConverter
 import me.tahzam23.schoolpower.html.AndroidDocumentCreator
-import me.tahzam23.schoolpower.login
+import me.tahzam23.schoolpower.scraper.SchoolPowerScraper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class SettingsButtonListener(private val app : AppCompatActivity) : View.OnClickListener {
+class SettingsButtonListener(private val app : Activity): View.OnClickListener {
+
     override fun onClick(p0: View?) {
         app.setContentView(R.layout.settings);
     }
 
 }
 
-class LoginButtonListener(private val app : MainActivity) : View.OnClickListener {
+class LoginButtonListener(
+    private val schoolPowerScraper: SchoolPowerScraper,
+    private val app : MainActivity
+): View.OnClickListener {
+
     override fun onClick(p0: View?) {
         val client = HttpClient {
             createDefaultClientConfig(this)
         }
 
         GlobalScope.launch {
-            val success = login(
-                client = client,
-                loginInformation = LoginInformation(
+            val success = try {
+                schoolPowerScraper.scrape(client, LoginInformation(
                     app.username.text.toString(),
                     app.password.text.toString()
-                ),
-                documentCreator = AndroidDocumentCreator(),
-                dateTimeFormatConverter = AndroidDateTimeFormatConverter()
-            )
+                ))
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
 
             app.runOnUiThread {
                 if (success) {
@@ -54,9 +60,11 @@ class LoginButtonListener(private val app : MainActivity) : View.OnClickListener
             }
         }
     }
+
 }
 
-class UpdateGradesButtonListener(private val app : MainActivity) : View.OnClickListener {
+class UpdateGradesButtonListener(private val app: MainActivity) : View.OnClickListener {
+
     override fun onClick(p0: View?) {
         val dtf = DateTimeFormatter.ofPattern("MM/dd at HH:mm:ss")
         val now = LocalDateTime.now()

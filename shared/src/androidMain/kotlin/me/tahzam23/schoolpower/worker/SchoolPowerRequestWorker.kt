@@ -7,17 +7,12 @@ import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.tahzam23.schoolpower.PasswordManager
-import me.tahzam23.schoolpower.data.RequestInformation
-import me.tahzam23.schoolpower.datetime.DateTimeFormatConverter
-import me.tahzam23.schoolpower.html.DocumentCreator
-import me.tahzam23.schoolpower.login
+import me.tahzam23.schoolpower.scraper.SchoolPowerScraper
 
 class SchoolPowerRequestWorker(
     private val passwordManager: PasswordManager,
-    private val requestInformation: RequestInformation,
     private val client: HttpClient,
-    private val documentCreator: DocumentCreator,
-    private val dateTimeFormatConverter: DateTimeFormatConverter,
+    private val schoolPowerScraper: SchoolPowerScraper,
     appContext: Context,
     workerParams: WorkerParameters
 ): CoroutineWorker(appContext, workerParams) {
@@ -27,13 +22,14 @@ class SchoolPowerRequestWorker(
             val loginInformation = passwordManager.getLoginDetails()
                 ?: return@withContext Result.failure()
 
-            val success = login(
-                requestInformation,
-                client,
-                loginInformation,
-                documentCreator,
-                dateTimeFormatConverter
-            )
+            val success = try {
+                schoolPowerScraper.scrape(client, loginInformation)
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+
             return@withContext if (success) {
                 Result.success()
             }

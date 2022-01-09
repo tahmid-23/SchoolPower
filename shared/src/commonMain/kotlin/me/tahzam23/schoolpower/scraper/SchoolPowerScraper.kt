@@ -5,8 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.*
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.data.RequestInformation
 import me.tahzam23.schoolpower.data.grade.*
@@ -183,6 +182,26 @@ class WebSchoolPowerScraper(
         }
 
         return MarkingPeriodGrades(letterGrade, grade, grades)
+    }
+
+    private fun parseGrade(jsonElement: JsonElement): Grade {
+        val assignment = jsonElement.jsonObject["_assignmentsections"]!!.jsonArray[0].jsonObject
+        val name = assignment["name"]!!.jsonPrimitive.content
+        val dueDate = assignment["duedate"]!!.jsonPrimitive.content
+        val totalPoints = assignment["scoreentrypoints"]!!.jsonPrimitive.double
+
+        val scores = assignment["_assignmentscores"]!!.jsonArray
+        return if (scores.size == 0) {
+            Grade(name, dueDate, totalPoints, null, null, null)
+        }
+        else {
+            val score = scores[0].jsonObject
+            val points = score["scorepoints"]?.jsonPrimitive?.double
+            val percentage = score["scorepercent"]?.jsonPrimitive?.double
+            val letterGrade = score["scorelettergrade"]?.jsonPrimitive?.content
+
+            Grade(name, dueDate, totalPoints, points, percentage, letterGrade)
+        }
     }
 
     private suspend fun getGradeDocument(client: HttpClient, href: String) =

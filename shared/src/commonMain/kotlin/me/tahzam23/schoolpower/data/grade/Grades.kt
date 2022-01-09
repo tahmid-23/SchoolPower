@@ -40,23 +40,3 @@ data class Grade(
     val percentage: Double?,
     val letterGrade: String?
 )
-
-fun parseGrade(jsonElement: JsonElement): Grade {
-    val assignment = jsonElement.jsonObject["_assignmentsections"]!!.jsonArray[0].jsonObject
-    val name = assignment["name"]!!.jsonPrimitive.content
-    val dueDate = assignment["duedate"]!!.jsonPrimitive.content
-    val totalPoints = assignment["scoreentrypoints"]!!.jsonPrimitive.double
-
-    val scores = assignment["_assignmentscores"]!!.jsonArray
-    return if (scores.size == 0) {
-        Grade(name, dueDate, totalPoints, null, null, null)
-    }
-    else {
-        val score = scores[0].jsonObject
-        val points = score["scorepoints"]?.jsonPrimitive?.double
-        val percentage = score["scorepercent"]?.jsonPrimitive?.double
-        val letterGrade = score["scorelettergrade"]?.jsonPrimitive?.content
-
-        Grade(name, dueDate, totalPoints, points, percentage, letterGrade)
-    }
-}

@@ -34,6 +34,9 @@ class LoginButtonListener(
 ): View.OnClickListener {
 
     override fun onClick(p0: View?) {
+        app.successText.text = "Logging in..."
+        val animation = LoginAnimationThread(app)
+        animation.start()
         val client = HttpClient {
             createDefaultClientConfig(this)
         }
@@ -58,12 +61,14 @@ class LoginButtonListener(
 
                 app.runOnUiThread {
                     if (success) {
+                        animation.stopAnimation()
                         app.successText.text = "Success"
                         app.successText.setTextColor(Color.GREEN)
                         app.setContentView(R.layout.grades)
                         app.gradePageSetup()
                     }
                     else {
+                        animation.stopAnimation()
                         app.successText.text = "Incorrect Username or Password!"
                         app.successText.setTextColor(Color.RED)
                     }
@@ -72,15 +77,49 @@ class LoginButtonListener(
         }
     }
 
+    class LoginAnimationThread(private val app: MainActivity) : Thread() {
+
+        private var condition = true
+
+        @Override
+        override fun run() {
+            app.runOnUiThread {
+                app.successText.setTextColor(app.defaultTextColor)
+            }
+            var i = 0
+            while (condition) {
+                app.runOnUiThread {
+                    app.successText.text = getText(i) + ".".repeat(i%4)
+                }
+                try {
+                    sleep(1000)
+                } catch(e : InterruptedException) {
+
+                }
+                i++
+            }
+        }
+
+        fun stopAnimation() {
+            condition = false
+        }
+
+        private fun getText(i : Int) : String {
+            if (i >= 8) {
+                return "Loading Grades"
+            }
+            return "Logging in"
+        }
+    }
+
 }
 
 class UpdateGradesButtonListener(private val app: MainActivity) : View.OnClickListener {
 
     override fun onClick(p0: View?) {
-        val dtf1 = DateTimeFormatter.ofPattern("MM/dd")
-        val dtf2 = DateTimeFormatter.ofPattern("HH:mm:ss")
+        val dtf = DateTimeFormatter.ofPattern("MM/dd 'at' HH:mm:ss")
         val now = LocalDateTime.now()
-        val text = "Last Updated: " + dtf1.format(now) + " at " + dtf2.format(now)
+        val text = "Last Updated: " + dtf.format(now)
         app.findViewById<TextView>(R.id.last_updated).text = text
     }
 

@@ -1,5 +1,6 @@
 package me.tahzam23.schoolpower.android
 
+import android.content.res.ColorStateList
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -22,6 +23,8 @@ class MainActivity: AppCompatActivity() {
         private set
     lateinit var settingsButton: Button
         private set
+    lateinit var defaultTextColor : ColorStateList
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,7 @@ class MainActivity: AppCompatActivity() {
             this
         ))
         findViewById<Button>(R.id.settings).setOnClickListener(SettingsButtonListener(this))
+        defaultTextColor = successText.textColors
     }
 
     fun gradePageSetup() {

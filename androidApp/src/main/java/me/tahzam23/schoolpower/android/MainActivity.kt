@@ -40,7 +40,9 @@ class MainActivity: AppCompatActivity() {
             this
         ))
         findViewById<Button>(R.id.settings).setOnClickListener(SettingsButtonListener(this))
-        val inflatedView = layoutInflater.inflate(R.layout.grades, null)
-        inflatedView.findViewById<Button>(R.id.update_button).setOnClickListener(UpdateGradesButtonListener(this))
+    }
+
+    fun gradePageSetup() {
+        findViewById<Button>(R.id.update_button).setOnClickListener(UpdateGradesButtonListener(this))
     }
 }

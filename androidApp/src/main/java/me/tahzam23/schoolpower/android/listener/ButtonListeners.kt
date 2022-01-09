@@ -61,6 +61,7 @@ class LoginButtonListener(
                         app.successText.text = "Success"
                         app.successText.setTextColor(Color.GREEN)
                         app.setContentView(R.layout.grades)
+                        app.gradePageSetup()
                     }
                     else {
                         app.successText.text = "Incorrect Username or Password!"
@@ -76,9 +77,10 @@ class LoginButtonListener(
 class UpdateGradesButtonListener(private val app: MainActivity) : View.OnClickListener {
 
     override fun onClick(p0: View?) {
-        val dtf = DateTimeFormatter.ofPattern("MM/dd at HH:mm:ss")
+        val dtf1 = DateTimeFormatter.ofPattern("MM/dd")
+        val dtf2 = DateTimeFormatter.ofPattern("HH:mm:ss")
         val now = LocalDateTime.now()
-        val text = "Last Updated: " + dtf.format(now)
+        val text = "Last Updated: " + dtf1.format(now) + " at " + dtf2.format(now)
         app.findViewById<TextView>(R.id.last_updated).text = text
     }
 

@@ -1,7 +1,5 @@
 package me.tahzam23.schoolpower.data.grade
 
-import kotlinx.serialization.json.*
-
 data class Course(
     val name: String,
     val teacher: String,

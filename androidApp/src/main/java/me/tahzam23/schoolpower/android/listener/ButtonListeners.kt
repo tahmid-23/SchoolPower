@@ -47,6 +47,8 @@ class LoginButtonListener(
                     )).forEach {
                         println(it)
                     }
+                    schoolPowerScraper.keepAlive(client)
+
                     true
                 } catch (e: Exception) {
                     e.printStackTrace()

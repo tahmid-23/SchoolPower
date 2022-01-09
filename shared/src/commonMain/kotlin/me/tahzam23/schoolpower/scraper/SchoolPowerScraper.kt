@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.*
 import me.tahzam23.schoolpower.data.LoginInformation
@@ -16,6 +17,8 @@ import me.tahzam23.schoolpower.html.Element
 interface SchoolPowerScraper {
 
     suspend fun scrape(client: HttpClient, loginInformation: LoginInformation): Collection<Course>
+
+    suspend fun keepAlive(client: HttpClient): Int
 
 }
 
@@ -62,6 +65,12 @@ class WebSchoolPowerScraper(
 
         private const val TIMESTAMP_PARAMETER_NAME = "_"
 
+        private const val KEEP_ALIVE_PARAMETER_NAME = "seconds"
+
+        private const val KEEP_ALIVE_RESPONSE_OBJECT_NAME = "Seconds"
+
+        private const val KEEP_ALIVE_RESPONSE_VALUE_NAME = "value"
+
     }
 
     override suspend fun scrape(
@@ -80,6 +89,17 @@ class WebSchoolPowerScraper(
             throw SchoolPowerScrapeException(e)
         }
     }
+
+    override suspend fun keepAlive(client: HttpClient) =
+        Json.parseToJsonElement(client.request<String>(requestInformation.root +
+                requestInformation.keepAliveEndpoint) {
+            method = HttpMethod.Put
+            body = TextContent("", ContentType.Any) // ktor won't let us explicitly set no content type
+            header(REFERER_HEADER, requestInformation.root + requestInformation.summaryEndpoint)
+            accept(ContentType.Application.Json)
+            parameter(KEEP_ALIVE_PARAMETER_NAME, 0)
+        }).jsonObject[KEEP_ALIVE_RESPONSE_OBJECT_NAME]!!
+            .jsonObject[KEEP_ALIVE_RESPONSE_VALUE_NAME]!!.jsonPrimitive.int
 
     private suspend fun getSummaryDocument(client: HttpClient, loginInformation: LoginInformation) =
         documentCreator.createDocument(client.submitForm(

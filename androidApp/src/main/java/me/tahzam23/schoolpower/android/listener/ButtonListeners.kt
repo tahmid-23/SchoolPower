@@ -4,9 +4,12 @@ import android.app.Activity
 import android.graphics.Color
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import io.ktor.client.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.tahzam23.schoolpower.android.MainActivity
 import me.tahzam23.schoolpower.android.R
 import me.tahzam23.schoolpower.createDefaultClientConfig
@@ -35,27 +38,29 @@ class LoginButtonListener(
             createDefaultClientConfig(this)
         }
 
-        GlobalScope.launch {
-            val success = try {
-                schoolPowerScraper.scrape(client, LoginInformation(
-                    app.username.text.toString(),
-                    app.password.text.toString()
-                ))
-                true
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
-
-            app.runOnUiThread {
-                if (success) {
-                    app.successText.text = "Success"
-                    app.successText.setTextColor(Color.GREEN)
-                    app.setContentView(R.layout.grades)
+        app.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val success = try {
+                    schoolPowerScraper.scrape(client, LoginInformation(
+                        app.username.text.toString(),
+                        app.password.text.toString()
+                    ))
+                    true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
                 }
-                else {
-                    app.successText.text = "Incorrect Username or Password!"
-                    app.successText.setTextColor(Color.RED)
+
+                app.runOnUiThread {
+                    if (success) {
+                        app.successText.text = "Success"
+                        app.successText.setTextColor(Color.GREEN)
+                        app.setContentView(R.layout.grades)
+                    }
+                    else {
+                        app.successText.text = "Incorrect Username or Password!"
+                        app.successText.setTextColor(Color.RED)
+                    }
                 }
             }
         }

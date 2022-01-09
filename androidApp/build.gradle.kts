@@ -35,5 +35,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5") // JDK8 libs
 }

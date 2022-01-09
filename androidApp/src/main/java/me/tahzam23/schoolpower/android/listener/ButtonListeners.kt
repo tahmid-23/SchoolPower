@@ -50,6 +50,7 @@ class LoginButtonListener(
                     e.printStackTrace()
                     false
                 }
+                client.close()
 
                 app.runOnUiThread {
                     if (success) {

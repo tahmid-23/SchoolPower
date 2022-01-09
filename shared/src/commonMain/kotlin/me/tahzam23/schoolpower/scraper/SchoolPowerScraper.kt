@@ -6,10 +6,10 @@ import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.data.RequestInformation
-import me.tahzam23.schoolpower.data.grade.Course
-import me.tahzam23.schoolpower.data.grade.markingPeriods
+import me.tahzam23.schoolpower.data.grade.*
 import me.tahzam23.schoolpower.datetime.DateTimeFormatConverter
 import me.tahzam23.schoolpower.html.DocumentCreator
 import me.tahzam23.schoolpower.html.Element
@@ -73,7 +73,7 @@ class WebSchoolPowerScraper(
             val summaryTable = getSummaryTable(getSummaryDocument(client, loginInformation))
 
             for (rowIndex in 2 until summaryTable.getChildCount() - 1) {
-                /*add(*/createCourse(client, summaryTable.getChild(rowIndex))/*)*/
+                add(createCourse(client, summaryTable.getChild(rowIndex)))
             }
         } catch (e: SchoolPowerScrapeException) {
             throw e
@@ -110,7 +110,7 @@ class WebSchoolPowerScraper(
             ?.getChild(1)
             ?: throw SchoolPowerScrapeException("Could not find a grade summary table!")
 
-    private suspend fun createCourse(client: HttpClient, row: Element): Course? {
+    private suspend fun createCourse(client: HttpClient, row: Element): Course {
         if (row.getChildCount() < 12 + markingPeriods.size) {
             throw SchoolPowerScrapeException("Row $row did not have enough information " +
                     "to create a course!")
@@ -120,33 +120,27 @@ class WebSchoolPowerScraper(
         val courseName = courseInfo.getOwnText()
         val teacherName = parseTeacherName(courseInfo)
 
-        for (markingPeriodIndex in markingPeriods.indices) {
-            val cell = row.getChild(12 + markingPeriodIndex)
-            if (cell.getAttribute(HTML_ATTRIBUTE_CLASS) != CLASS_UNAVAILABLE) {
-                if (cell.getChildCount() == 0) {
-                    throw SchoolPowerScrapeException("Failed to get course info link from cell " +
-                            "$cell!")
-                }
-
-                val link = cell.getChild(0)
-
-                if (link.getOwnText() != NO_GRADES_TEXT) {
-                    val href = link.getAttribute(HTML_ATTRIBUTE_HREF)
-
-                    val json = getAssignmentJson(
-                        client,
-                        href,
-                        parseAssignmentRequestInfo(getGradeDocument(client, href)).toString()
-                    )
-
-                    Json.parseToJsonElement(json)
-                }
-
+        return Course(courseName, teacherName, buildMap {
+            for (markingPeriodIndex in markingPeriods.indices) {
                 val markingPeriod = markingPeriods[markingPeriodIndex]
-            }
-        }
 
-        return null
+                val cell = row.getChild(12 + markingPeriodIndex)
+                if (cell.getAttribute(HTML_ATTRIBUTE_CLASS) != CLASS_UNAVAILABLE) {
+                    if (cell.getChildCount() == 0) {
+                        throw SchoolPowerScrapeException("Failed to get course info link from " +
+                                "cell $cell!")
+                    }
+
+                    val link = cell.getChild(0)
+                    val gradeSummary = link.getOwnText()
+                    if (gradeSummary != NO_GRADES_TEXT) {
+                        put(markingPeriod, createMarkingPeriodGrades(client, gradeSummary, link))
+                    }
+                }
+
+                putIfAbsent(markingPeriod, null)
+            }
+        })
     }
 
     private fun parseTeacherName(courseInfo: Element): String {
@@ -162,6 +156,33 @@ class WebSchoolPowerScraper(
         }
 
         return text.substring(TEACHER_FIELD_PREFIX.length)
+    }
+
+    private suspend fun createMarkingPeriodGrades(
+        client: HttpClient,
+        gradeSummary: String,
+        link: Element
+    ): MarkingPeriodGrades {
+        val gradeSummaryList = gradeSummary.split(" ")
+        val letterGrade = gradeSummaryList[0]
+        val grade = gradeSummaryList[1].toDouble()
+
+        val href = link.getAttribute(HTML_ATTRIBUTE_HREF)
+
+        val json = getAssignmentJson(
+            client,
+            href,
+            parseAssignmentRequestInfo(getGradeDocument(client, href)).toString()
+        )
+
+        val jsonElement = Json.parseToJsonElement(json)
+        val grades = buildList {
+            for (assignment in jsonElement.jsonArray) {
+                add(parseGrade(assignment))
+            }
+        }
+
+        return MarkingPeriodGrades(letterGrade, grade, grades)
     }
 
     private suspend fun getGradeDocument(client: HttpClient, href: String) =

@@ -44,7 +44,9 @@ class LoginButtonListener(
                     schoolPowerScraper.scrape(client, LoginInformation(
                         app.username.text.toString(),
                         app.password.text.toString()
-                    ))
+                    )).forEach {
+                        println(it)
+                    }
                     true
                 } catch (e: Exception) {
                     e.printStackTrace()

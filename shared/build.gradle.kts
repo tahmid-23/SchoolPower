@@ -36,8 +36,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                api("androidx.work:work-runtime-ktx:2.7.1")
                 implementation("io.ktor:ktor-client-$androidKtorEngine:$ktorVersion")
-                implementation("androidx.work:work-runtime-ktx:2.7.1")
                 implementation("org.jsoup:jsoup:1.14.3")
             }
         }

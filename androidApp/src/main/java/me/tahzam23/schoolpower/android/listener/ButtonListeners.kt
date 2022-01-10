@@ -6,9 +6,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import io.ktor.client.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import me.tahzam23.schoolpower.android.MainActivity
 import me.tahzam23.schoolpower.android.R
@@ -32,9 +30,22 @@ class LoginButtonListener(
 ): View.OnClickListener {
 
     override fun onClick(p0: View?) {
-        app.successText.text = "Logging in..."
-        val animation = LoginAnimationThread(app)
-        animation.start()
+        val animation = app.lifecycleScope.launch {
+            withContext(Dispatchers.Main) {
+                app.successText.setTextColor(app.defaultTextColor)
+                var i = 0
+
+                while (isActive) {
+                    app.successText.text = "Loading Grades" + ".".repeat(i % 4)
+                    if (++i == 4) {
+                        i = 0
+                    }
+
+                    delay(1000)
+                }
+            }
+        }
+
         val client = HttpClient {
             createDefaultClientConfig(this)
         }
@@ -55,58 +66,25 @@ class LoginButtonListener(
                     e.printStackTrace()
                     false
                 }
-                client.close()
 
-                app.runOnUiThread {
-                    if (success) {
-                        animation.stopAnimation()
+                client.close()
+                animation.cancelAndJoin()
+
+                if (success) {
+                    app.runOnUiThread {
                         app.successText.text = "Success"
                         app.successText.setTextColor(Color.GREEN)
                         app.setContentView(R.layout.grades)
                         app.gradePageSetup()
                     }
-                    else {
-                        animation.stopAnimation()
+                }
+                else {
+                    app.runOnUiThread {
                         app.successText.text = "Incorrect Username or Password!"
                         app.successText.setTextColor(Color.RED)
                     }
                 }
             }
-        }
-    }
-
-    class LoginAnimationThread(private val app: MainActivity) : Thread() {
-
-        private var condition = true
-
-        @Override
-        override fun run() {
-            app.runOnUiThread {
-                app.successText.setTextColor(app.defaultTextColor)
-            }
-            var i = 0
-            while (condition) {
-                app.runOnUiThread {
-                    app.successText.text = getText(i) + ".".repeat(i%4)
-                }
-                try {
-                    sleep(1000)
-                } catch(e : InterruptedException) {
-
-                }
-                i++
-            }
-        }
-
-        fun stopAnimation() {
-            condition = false
-        }
-
-        private fun getText(i : Int) : String {
-            if (i >= 8) {
-                return "Loading Grades"
-            }
-            return "Logging in"
         }
     }
 

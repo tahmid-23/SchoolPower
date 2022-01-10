@@ -5,6 +5,9 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.*
 import me.tahzam23.schoolpower.data.LoginInformation
@@ -78,10 +81,14 @@ class WebSchoolPowerScraper(
         loginInformation: LoginInformation
     ): Collection<Course> = buildList {
         try {
-            val summaryTable = getSummaryTable(getSummaryDocument(client, loginInformation))
+            coroutineScope {
+                val summaryTable = getSummaryTable(getSummaryDocument(client, loginInformation))
 
-            for (rowIndex in 2 until summaryTable.getChildCount() - 1) {
-                add(createCourse(client, summaryTable.getChild(rowIndex)))
+                for (rowIndex in 2 until summaryTable.getChildCount() - 1) {
+                    launch {
+                        add(createCourse(client, summaryTable.getChild(rowIndex)))
+                    }
+                }
             }
         } catch (e: SchoolPowerScrapeException) {
             throw e
@@ -91,7 +98,7 @@ class WebSchoolPowerScraper(
     }
 
     override suspend fun keepAlive(client: HttpClient) =
-        Json.parseToJsonElement(client.request<String>(requestInformation.root +
+        Json.parseToJsonElement(client.request(requestInformation.root +
                 requestInformation.keepAliveEndpoint) {
             method = HttpMethod.Put
             body = TextContent("", ContentType.Any) // ktor won't let us explicitly set no content type

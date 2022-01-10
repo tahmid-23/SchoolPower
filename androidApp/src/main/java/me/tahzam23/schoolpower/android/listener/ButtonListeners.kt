@@ -7,15 +7,13 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import me.tahzam23.schoolpower.android.MainActivity
 import me.tahzam23.schoolpower.android.R
 import me.tahzam23.schoolpower.createDefaultClientConfig
 import me.tahzam23.schoolpower.data.LoginInformation
-import me.tahzam23.schoolpower.datetime.AndroidDateTimeFormatConverter
-import me.tahzam23.schoolpower.html.AndroidDocumentCreator
 import me.tahzam23.schoolpower.scraper.SchoolPowerScraper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

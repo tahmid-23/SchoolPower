@@ -6,12 +6,12 @@ import io.ktor.client.features.cookies.*
 import kotlinx.datetime.*
 import me.tahzam23.schoolpower.data.SchoolPowerInfo
 
-fun createDefaultClientConfig(config: HttpClientConfig<*>) {
-    config.install(HttpRedirect) {
+fun HttpClientConfig<*>.createDefaultClientConfig() {
+    install(HttpRedirect) {
         checkHttpMethod = false
     }
 
-    config.install(HttpCookies) {
+    install(HttpCookies) {
         storage = AcceptAllCookiesStorage()
     }
 
@@ -21,7 +21,7 @@ fun createDefaultClientConfig(config: HttpClientConfig<*>) {
     }
      */
 
-    config.BrowserUserAgent()
+    BrowserUserAgent()
 }
 
 fun isSchoolPowerOpen(schoolPowerInfo: SchoolPowerInfo = SchoolPowerInfo()): Boolean {

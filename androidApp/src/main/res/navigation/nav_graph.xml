@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/settingsFragment">
+    app:startDestination="@id/loginPageFragment">
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="me.tahzam23.schoolpower.android.SettingsFragment"
+        android:name="me.tahzam23.schoolpower.android.fragment.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/loginPageFragment"
-        android:name="me.tahzam23.schoolpower.android.LoginPageFragment"
+        android:name="me.tahzam23.schoolpower.android.fragment.LoginPageFragment"
         android:label="fragment_login_page"
         tools:layout="@layout/fragment_login_page" >
         <action
@@ -24,7 +24,7 @@
     </fragment>
     <fragment
         android:id="@+id/loggedInFragment"
-        android:name="me.tahzam23.schoolpower.android.LoggedInFragment"
+        android:name="me.tahzam23.schoolpower.android.fragment.LoggedInFragment"
         android:label="fragment_logged_in"
         tools:layout="@layout/fragment_logged_in" />
 </navigation>

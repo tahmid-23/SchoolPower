@@ -5,7 +5,7 @@
     android:id="@+id/login_page_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginPageFragment" >
+    tools:context=".fragment.LoginPageFragment">
 
     <EditText
         android:id="@+id/schoolpower_username"

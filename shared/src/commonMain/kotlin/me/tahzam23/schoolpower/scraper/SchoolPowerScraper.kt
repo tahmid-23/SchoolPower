@@ -149,6 +149,7 @@ class WebSchoolPowerScraper(
             for (markingPeriodIndex in markingPeriods.indices) {
                 val markingPeriod = markingPeriods[markingPeriodIndex]
 
+                var flag = false
                 val cell = row.getChild(12 + markingPeriodIndex)
                 if (cell.getAttribute(HTML_ATTRIBUTE_CLASS) != CLASS_UNAVAILABLE) {
                     if (cell.getChildCount() == 0) {
@@ -160,10 +161,13 @@ class WebSchoolPowerScraper(
                     val gradeSummary = link.getOwnText()
                     if (gradeSummary != NO_GRADES_TEXT) {
                         put(markingPeriod, createMarkingPeriodGrades(client, gradeSummary, link))
+                        flag = true
                     }
                 }
 
-                putIfAbsent(markingPeriod, null)
+                if (!flag) {
+                    put(markingPeriod, null)
+                }
             }
         })
     }

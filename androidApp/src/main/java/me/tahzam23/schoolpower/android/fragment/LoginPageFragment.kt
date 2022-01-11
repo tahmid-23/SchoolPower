@@ -3,6 +3,7 @@ package me.tahzam23.schoolpower.android.fragment
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.text.TextUtils
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import io.ktor.client.*
@@ -41,12 +43,26 @@ class LoginPageFragment: Fragment() {
             it.findNavController().navigate(action)
         }
 
+        val submitButton = view.findViewById<Button>(R.id.schoolpower_submit_button)
+        submitButton.isEnabled = false
+
         val username = view.findViewById<EditText>(R.id.schoolpower_username)
         val password = view.findViewById<EditText>(R.id.schoolpower_password)
 
+        var flagUsername = false
+        var flagPassword = false
+        username.addTextChangedListener {
+            flagUsername = !TextUtils.isEmpty(it?.toString())
+            submitButton.isEnabled = flagUsername && flagPassword
+        }
+        password.addTextChangedListener {
+            flagPassword = !TextUtils.isEmpty(it?.toString())
+            submitButton.isEnabled = flagUsername && flagPassword
+        }
+
         val successText = view.findViewById<TextView>(R.id.schoolpower_success)
         val defaultColors = successText.textColors
-        view.findViewById<Button>(R.id.schoolpower_submit_button).setOnClickListener {
+        submitButton.setOnClickListener {
             val animation = beginAnimation(successText, defaultColors)
 
             val client = HttpClient {

@@ -74,7 +74,7 @@ class LoginPageFragment: Fragment() {
                     schoolPowerScraper.scrape(client, LoginInformation(
                         username.text.toString(),
                         password.text.toString()
-                    )).forEach {
+                    )).courses.forEach {
                         println(it)
                     }
                     schoolPowerScraper.keepAlive(client)

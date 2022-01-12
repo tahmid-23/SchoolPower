@@ -8,7 +8,10 @@ import io.ktor.http.content.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.*
+import me.tahzam23.schoolpower.BCA_TIMEZONE_ID
 import me.tahzam23.schoolpower.data.LoginInformation
 import me.tahzam23.schoolpower.data.RequestInformation
 import me.tahzam23.schoolpower.data.grade.*
@@ -18,7 +21,7 @@ import me.tahzam23.schoolpower.html.Element
 
 interface SchoolPowerScraper {
 
-    suspend fun scrape(client: HttpClient, loginInformation: LoginInformation): Collection<Course>
+    suspend fun scrape(client: HttpClient, loginInformation: LoginInformation): CourseSummary
 
     suspend fun keepAlive(client: HttpClient): Int
 
@@ -78,7 +81,7 @@ class WebSchoolPowerScraper(
     override suspend fun scrape(
         client: HttpClient,
         loginInformation: LoginInformation
-    ): Collection<Course> = buildList {
+    ): CourseSummary = CourseSummary(buildList {
         try {
             coroutineScope {
                 val summaryTable = getSummaryTable(getSummaryDocument(client, loginInformation))
@@ -94,7 +97,7 @@ class WebSchoolPowerScraper(
         } catch (e: Exception) {
             throw SchoolPowerScrapeException(e)
         }
-    }
+    }, Clock.System.now().toLocalDateTime(TimeZone.of(BCA_TIMEZONE_ID)))
 
     override suspend fun keepAlive(client: HttpClient) =
         Json.parseToJsonElement(client.request(requestInformation.root +

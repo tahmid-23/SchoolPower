@@ -9,7 +9,7 @@ import android.widget.Switch
 import me.tahzam23.schoolpower.android.R
 import me.tahzam23.schoolpower.data.Settings
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : Fragment /*PreferenceFragmentCompat*/() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +40,20 @@ class SettingsFragment : Fragment() {
 
         return view
     }
+
+    /*
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    setPreferencesFromResource(R.xml.settings_screen, rootKey)
+    findPreference<SwitchPreferenceCompat>("saveCredentials")!!
+        .setOnPreferenceClickListener {
+            if (it.isEnabled) {
+                //TODO: display dialog that this will reset your password (needs a fragment google it)i
+            }
+
+            return@setOnPreferenceClickListener true
+        }
+    }
+    */
 
 
 }

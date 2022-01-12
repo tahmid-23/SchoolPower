@@ -23,8 +23,13 @@ import me.tahzam23.schoolpower.data.RequestInformation
 import me.tahzam23.schoolpower.datetime.AndroidDateTimeFormatConverter
 import me.tahzam23.schoolpower.html.AndroidDocumentCreator
 import me.tahzam23.schoolpower.scraper.WebSchoolPowerScraper
+import me.tahzam23.schoolpower.storage.AndroidGradeSaver
+import me.tahzam23.schoolpower.storage.GradeSaver
+import java.io.File
 
 class LoginPageFragment: Fragment() {
+
+    private lateinit var gradeSaver: GradeSaver
 
     private val schoolPowerScraper = WebSchoolPowerScraper(
         RequestInformation(),
@@ -36,6 +41,8 @@ class LoginPageFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        gradeSaver = AndroidGradeSaver(File(activity!!.filesDir, "grades.json"))
+
         val view = inflater.inflate(R.layout.fragment_login_page, container, false)
 
         view.findViewById<Button>(R.id.settings).setOnClickListener {
@@ -71,13 +78,18 @@ class LoginPageFragment: Fragment() {
 
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
                 val success = try {
-                    schoolPowerScraper.scrape(client, LoginInformation(
+                    val summary = schoolPowerScraper.scrape(client, LoginInformation(
                         username.text.toString(),
                         password.text.toString()
-                    )).courses.forEach {
+                    ))
+                    summary.courses.forEach {
                         println(it)
                     }
                     schoolPowerScraper.keepAlive(client)
+
+                    launch(Dispatchers.IO) {
+                        gradeSaver.saveGrades(summary)
+                    }
 
                     true
                 } catch (e: Exception) {

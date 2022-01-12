@@ -19,4 +19,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Switch
+            android:id="@+id/save_password_switch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Save Password"
+            android:textSize="20sp" />
+
+        <Switch
+            android:id="@+id/auto_refresh_switch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Refresh Grades Automatically"
+            android:textSize="20sp" />
+
+        <Switch
+            android:id="@+id/hagjer_switch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Refresh Grades During Blocked Window"
+            android:textSize="18sp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
